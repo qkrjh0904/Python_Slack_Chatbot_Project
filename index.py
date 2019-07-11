@@ -58,12 +58,12 @@ def _crawl_music_chart(text, i):
     time = soup.find_all("div", class_="time")
     btn_like = soup.find_all("button", class_="btn_like")
 
-    keywords.append(str(i+1)+"위 - " 
-    + title[i].find("p").find("strong").get_text().strip()
+    keywords.append(str(i+1)+". " 
+    + "<http://haemukja.com" + title_link[i].find("p").find("a")["href"] + "|"
+    + title[i].find("p").find("strong").get_text().strip() + ">"
     + " / 해먹지수 : " + score[i].find("strong").get_text().strip()
     + " / 조리시간 : " + time[i].get_text().strip() 
     + " / 좋아요 수 : " + btn_like[i].get_text().strip()
-    + " / link : http://haemukja.com" + title_link[i].find("p").find("a")["href"]
     )
 
     # 한글 지원을 위해 앞에 unicode u를 붙혀준다.
@@ -83,7 +83,7 @@ def crawl_image_in_url(text, i):
         image_source.append(src_source.find("img").get("src"))
     print(image_source)
     image_blocks.append(ImageBlock(image_url = image_source[i],alt_text="이미지가안뜰때보이는문구"))
-    
+
     return (image_blocks)
 
 # 챗봇이 멘션을 받았을 경우

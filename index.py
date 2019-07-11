@@ -53,6 +53,7 @@ def _crawl_music_chart(text):
 
     keywords = []
     title = soup.find("ul", class_="lst_recipe").find_all("li")
+    title_link = soup.find("ul", class_="lst_recipe").find_all("li")
     score = soup.find_all("span", class_="judge")
     time = soup.find_all("div", class_="time")
     btn_like = soup.find_all("button", class_="btn_like")
@@ -62,6 +63,7 @@ def _crawl_music_chart(text):
         + " / 해먹지수 : " + score[i].find("strong").get_text().strip()
         + " / 조리시간 : " + time[i].get_text().strip() 
         + " / 좋아요 수 : " + btn_like[i].get_text().strip()
+        + " / link : http://haemukja.com" + title_link[i].find("p").find("a")["href"]
         )
 
     # 한글 지원을 위해 앞에 unicode u를 붙혀준다.

@@ -4,6 +4,7 @@
 #                             개인 프로젝트 import                                     #
 #                                                                                     #
 #######################################################################################
+
 import secrete
 
 #######################################################################################
@@ -17,7 +18,7 @@ import secrete
 # -*- coding: utf-8 -*-
 import re
 import urllib.request
-
+from urllib import parse
 from bs4 import BeautifulSoup
 
 from flask import Flask
@@ -31,8 +32,8 @@ import json
 import csv
 from operator import itemgetter
 
-SLACK_TOKEN = "?"
-SLACK_SIGNING_SECRET = "?"
+SLACK_TOKEN = secrete.oauth
+SLACK_SIGNING_SECRET = secrete.basic_secrete
 
 
 app = Flask(__name__)
@@ -42,45 +43,65 @@ slack_web_client = WebClient(token=SLACK_TOKEN)
 
 
 # 크롤링 함수 구현하기
-def _crawl_music_chart(text):
-    if not "music" in text:
-        return "`@<봇이름> music` 과 같이 멘션해주세요."
+# def _crawl_music_chart(text):
+#     if not "music" in text:
+#         return "`@<봇이름> music` 과 같이 멘션해주세요."
 
-    url = "https://music.bugs.co.kr/chart"
+#     url = "https://music.bugs.co.kr/chart"
 
-    sourcecode = urllib.request.urlopen(url).read()
-    soup = BeautifulSoup(sourcecode, "html.parser")
+#     sourcecode = urllib.request.urlopen(url).read()
+#     soup = BeautifulSoup(sourcecode, "html.parser")
 
-    keywords = []
-    title = soup.find_all("p", class_="title")
-    artist = soup.find_all("p", class_="artist")
-    for i in range(10):
-        keywords.append(str(i+1)+"위 : " + title[i].get_text().strip() + " / " + artist[i].get_text().strip())
+#     keywords = []
+#     title = soup.find_all("p", class_="title")
+#     artist = soup.find_all("p", class_="artist")
+#     for i in range(10):
+#         keywords.append(str(i+1)+"위 : " + title[i].get_text().strip() + " / " + artist[i].get_text().strip())
 
-    # 한글 지원을 위해 앞에 unicode u를 붙혀준다.
-    return u'\n'.join(keywords)
+#     # 한글 지원을 위해 앞에 unicode u를 붙혀준다.
+#     return u'\n'.join(keywords)
 
+def crawl_image_in_url(text):
+    #print(text[13:])
+    text.strip()
+    
+    url = "https://haemukja.com/recipes?utf8=%E2%9C%93&sort=rlv&name=" + parse.quote(text) #임의 URL 현: 볶음밥.
 
+    source_code = urllib.request.urlopen(url).read()
+    soup = BeautifulSoup(source_code, "html.parser")
+    image_source = []
+    image_blocks = [] 
 
+    for src_source in soup.find_all("a", class_="call_recipe thmb"):
+        image_source.append(src_source.find("img").get("src"))
+    #print(image_source)
+    for block in range(len(image_source)):
+        image_blocks.append(ImageBlock(image_url = image_source[block],alt_text="이미지가안뜰때보이는문구"))
+    #print(image_blocks)  
+    return (image_blocks)
 
 # 챗봇이 멘션을 받았을 경우
 @slack_events_adaptor.on("app_mention")
 def app_mentioned(event_data):
     channel = event_data["event"]["channel"]
     text = event_data["event"]["text"]
-    
-    message = _crawl_music_chart(text)
+    message = crawl_image_in_url(text)
     slack_web_client.chat_postMessage(
-        channel=channel,
-        text=message
+         channel=channel, 
+         blocks=extract_json(message)
     )
+    # message = _crawl_music_chart(text)
+    # slack_web_client.chat_postMessage(
+    #     channel=channel,
+    #     text=message
+    # )
     
     # slack_web_client.chat_postMessage(
     #     channel = event_data["event"]["channel"],
     #     text = "<http://www.naver.com|여기를 클릭하세요> => 네이버입니다"
     #     # text = "*진한 글씨* _비스듬한 글씨_ ~취소선~ `print(source code)`"
     # )
-    
+    #이미지 출력을 위한 프로세싱.
     # block1 = ImageBlock(image_url="https://previews.123rf.com/images/isselee/isselee1101/isselee110100100/8652164-%ED%9D%B0%EC%83%89-%EB%B0%B0%EA%B2%BD-%EC%95%9E%EC%9D%98-%ED%86%A0%EB%81%BC-%ED%86%A0%EB%81%BC.jpg",alt_text="이미지가안뜰때보이는문구")
     # block2 = SectionBlock(fields=["text1", "text2"])
     # my_blocks= [block1, block2]

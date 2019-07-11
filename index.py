@@ -43,19 +43,18 @@ slack_web_client = WebClient(token=SLACK_TOKEN)
 
 # 크롤링 함수 구현하기
 def _crawl_music_chart(text):
-    if not "music" in text:
-        return "`@<봇이름> music` 과 같이 멘션해주세요."
+    if not "food" in text:
+        return "`@<봇이름> food` 과 같이 멘션해주세요."
 
-    url = "https://music.bugs.co.kr/chart"
+    url = "http://haemukja.com/recipes?name=%EB%B3%B6%EC%9D%8C%EB%B0%A5&sort=rlv&utf8=%E2%9C%93"
 
     sourcecode = urllib.request.urlopen(url).read()
     soup = BeautifulSoup(sourcecode, "html.parser")
 
     keywords = []
-    title = soup.find_all("p", class_="title")
-    artist = soup.find_all("p", class_="artist")
-    for i in range(10):
-        keywords.append(str(i+1)+"위 : " + title[i].get_text().strip() + " / " + artist[i].get_text().strip())
+    time = soup.find_all("div", class_="time")
+    for i in range(12):
+        keywords.append(str(i+1)+"위 : " + time[i].get_text().strip())
 
     # 한글 지원을 위해 앞에 unicode u를 붙혀준다.
     return u'\n'.join(keywords)

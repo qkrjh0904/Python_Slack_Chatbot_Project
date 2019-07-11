@@ -40,6 +40,7 @@ app = Flask(__name__)
 slack_events_adaptor = SlackEventAdapter(SLACK_SIGNING_SECRET, "/listening", app)
 slack_web_client = WebClient(token=SLACK_TOKEN)
 
+#test commit
 
 # 크롤링 함수 구현하기
 def _crawl_music_chart(text):

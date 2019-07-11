@@ -69,6 +69,24 @@ def _crawl_music_chart(text):
     # 한글 지원을 위해 앞에 unicode u를 붙혀준다.
     return u'\n'.join(keywords)
 
+def crawl_image_in_url(text):
+    #print(text[13:])
+    text.strip()
+    
+    url = "https://haemukja.com/recipes?utf8=%E2%9C%93&sort=rlv&name=%EB%B3%B6%EC%9D%8C%EB%B0%A5" #+ #parse.quote(text) #임의 URL 현: 볶음밥.
+
+    source_code = urllib.request.urlopen(url).read()
+    soup = BeautifulSoup(source_code, "html.parser")
+    image_source = []
+    image_blocks = [] 
+
+    for src_source in soup.find_all("a", class_="call_recipe thmb"):
+        image_source.append(src_source.find("img").get("src"))
+    print(image_source)
+    for block in range(len(image_source)):
+        image_blocks.append(ImageBlock(image_url = image_source[block],alt_text="이미지가안뜰때보이는문구"))
+    #print(image_blocks)  
+    return (image_blocks)
 
 # 챗봇이 멘션을 받았을 경우
 @slack_events_adaptor.on("app_mention")
@@ -80,6 +98,11 @@ def app_mentioned(event_data):
     slack_web_client.chat_postMessage(
         channel=channel,
         text=message
+    )
+    message = crawl_image_in_url(text)
+    slack_web_client.chat_postMessage(
+         channel=channel, 
+         blocks=extract_json(message)
     )
 
 # / 로 접속하면 서버가 준비되었다고 알려줍니다.

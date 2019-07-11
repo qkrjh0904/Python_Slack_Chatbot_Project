@@ -31,8 +31,8 @@ import json
 import csv
 from operator import itemgetter
 
-SLACK_TOKEN = "?"
-SLACK_SIGNING_SECRET = "?"
+SLACK_TOKEN = secrete.SLACK_TOKEN
+SLACK_SIGNING_SECRET = secrete.SLACK_SIGNING_SECRET
 
 
 app = Flask(__name__)

@@ -70,8 +70,6 @@ def _crawl_music_chart(text):
     return u'\n'.join(keywords)
 
 
-
-
 # 챗봇이 멘션을 받았을 경우
 @slack_events_adaptor.on("app_mention")
 def app_mentioned(event_data):
@@ -83,41 +81,6 @@ def app_mentioned(event_data):
         channel=channel,
         text=message
     )
-    
-    # slack_web_client.chat_postMessage(
-    #     channel = event_data["event"]["channel"],
-    #     text = "<http://www.naver.com|여기를 클릭하세요> => 네이버입니다"
-    #     # text = "*진한 글씨* _비스듬한 글씨_ ~취소선~ `print(source code)`"
-    # )
-    
-    # block1 = ImageBlock(image_url="https://previews.123rf.com/images/isselee/isselee1101/isselee110100100/8652164-%ED%9D%B0%EC%83%89-%EB%B0%B0%EA%B2%BD-%EC%95%9E%EC%9D%98-%ED%86%A0%EB%81%BC-%ED%86%A0%EB%81%BC.jpg",alt_text="이미지가안뜰때보이는문구")
-    # block2 = SectionBlock(fields=["text1", "text2"])
-    # my_blocks= [block1, block2]
-    # slack_web_client.chat_postMessage(
-    #     channel=channel, 
-    #     blocks=extract_json(my_blocks)
-    # )
-
-    # 다른 사람이 메시지를 올렸을 때, 그 사람에게만 답장하기
-    # 참고: https://api.slack.com/methods/chat.postEphemeral    
-    # slack_web_client.chat_postEphemeral(
-    #     channel=channel,
-    #     user=event_data["event"]["user"],
-    #     text="조용히 하세요!"
-    # )
-
-    ## name으로 id값 받아오기
-    # text = ["slackbot", "hyena", "qkrjh0904"]
-    # response = slack_web_client.users_list()
-    # for user in response["members"]:
-    #     if user["name"] in text:
-    #         slack_web_client.chat_postMessage(
-    #             channel = channel,
-    #             text = user["name"] + " : " + user["id"]
-    #         )
-    #         slack_web_client.chat_postEphemeral(
-    #             channel="channel", user=user_id, text="뭐하고 있니?"
-    #         )
 
 # / 로 접속하면 서버가 준비되었다고 알려줍니다.
 @app.route("/", methods=["GET"])

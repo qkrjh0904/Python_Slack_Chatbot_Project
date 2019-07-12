@@ -5,7 +5,7 @@
 #                                                                                     #
 #######################################################################################
 import secrete
-
+import url_encoding
 #######################################################################################
 #                                                                                     #
 #                                                                                     #
@@ -39,14 +39,18 @@ app = Flask(__name__)
 # /listening 으로 슬랙 이벤트를 받습니다.
 slack_events_adaptor = SlackEventAdapter(SLACK_SIGNING_SECRET, "/listening", app)
 slack_web_client = WebClient(token=SLACK_TOKEN)
-URL = "http://haemukja.com/recipes?name=%EB%B3%B6%EC%9D%8C%EB%B0%A5&sort=rlv&utf8=%E2%9C%93"
+
 
 # 크롤링 함수 구현하기
-def _crawl_music_chart(text, i):
-    if not "food" in text:
-        return "`@<봇이름> food` 과 같이 멘션해주세요."
+def _crawl_food_chart(text, i):
+    text.strip()
+    hangle = re.compile('[^ㄱ-ㅣ가-힣]+')
+    text = hangle.sub('',text)   
+    keyword = url_encoding.url_enco(text) #한글을 URL인코딩 작업
+    if(text is ""):
+        return "잘못된 요리이름입니다! 한글로 요리이름을 입력해주세요!"
 
-    url = URL
+    url = secrete.URL + keyword
 
     sourcecode = urllib.request.urlopen(url).read()
     soup = BeautifulSoup(sourcecode, "html.parser")
@@ -62,22 +66,25 @@ def _crawl_music_chart(text, i):
     + "<http://haemukja.com" + title_link[i].find("p").find("a")["href"] + "|"
     + title[i].find("p").find("strong").get_text().strip() + ">"
     + " / 해먹지수 : " + score[i].find("strong").get_text().strip()
-    + " / 조리시간 : " + time[i].get_text().strip() 
-    + " / 좋아요 수 : " + btn_like[i].get_text().strip()
+    + " / ⌚: " + time[i].get_text().strip() 
+    + " / 💗: " + btn_like[i].get_text().strip()
     )
 
     # 한글 지원을 위해 앞에 unicode u를 붙혀준다.
     return u'\n'.join(keywords)
 
 def crawl_image_in_url(text, i):
-    text.strip()
-    
-    url = URL
-
-    source_code = urllib.request.urlopen(url).read()
-    soup = BeautifulSoup(source_code, "html.parser")
     image_source = []
     image_blocks = [] 
+
+    text.strip()
+    hangle = re.compile('[^ㄱ-ㅣ가-힣]+')
+    text = hangle.sub('',text)
+    if(text is ""):
+        return "잘못된 요리이름입니다! 한글로 요리이름을 입력해주세요!"
+    url = secrete.URL + keyword
+    source_code = urllib.request.urlopen(url).read()
+    soup = BeautifulSoup(source_code, "html.parser")
 
     for src_source in soup.find_all("a", class_="call_recipe thmb"):
         image_source.append(src_source.find("img").get("src"))
